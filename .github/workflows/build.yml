@@ -7,7 +7,6 @@ on:
 
 env:
   UNITY_PATH: /Applications/Unity/Hub/Editor/6000.3.11f1/Unity.app/Contents/MacOS/Unity
-  PROJECT_PATH: .
 
 jobs:
   build-ios:
@@ -17,7 +16,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache Unity Library
+      - name: Cache Library
         uses: actions/cache@v4
         with:
           path: Library
@@ -30,13 +29,12 @@ jobs:
             -quit \
             -batchmode \
             -nographics \
-            -projectPath $PROJECT_PATH \
+            -projectPath . \
             -executeMethod BuildScript.BuildIOS \
             -logFile build-ios.log \
             -buildTarget iOS
-          echo "iOS build done"
 
-      - name: Upload iOS artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -53,7 +51,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Cache Unity Library
+      - name: Cache Library
         uses: actions/cache@v4
         with:
           path: Library
@@ -66,13 +64,12 @@ jobs:
             -quit \
             -batchmode \
             -nographics \
-            -projectPath $PROJECT_PATH \
+            -projectPath . \
             -executeMethod BuildScript.BuildAndroid \
             -logFile build-android.log \
             -buildTarget Android
-          echo "Android build done"
 
-      - name: Upload Android artifact
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         if: always()
         with:

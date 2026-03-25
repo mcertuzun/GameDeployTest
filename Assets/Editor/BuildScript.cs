@@ -20,16 +20,12 @@ public class BuildScript
         };
         var report = BuildPipeline.BuildPlayer(options);
         if (report.summary.result != BuildResult.Succeeded)
-        {
-            Console.WriteLine("iOS build failed!");
             EditorApplication.Exit(1);
-        }
         EditorApplication.Exit(0);
     }
 
     public static void BuildAndroid()
     {
-        PlayerSettings.Android.useCustomKeystore = false;
         var options = new BuildPlayerOptions
         {
             scenes = GetScenes(),
@@ -39,10 +35,7 @@ public class BuildScript
         };
         var report = BuildPipeline.BuildPlayer(options);
         if (report.summary.result != BuildResult.Succeeded)
-        {
-            Console.WriteLine("Android build failed!");
             EditorApplication.Exit(1);
-        }
         EditorApplication.Exit(0);
     }
 }
