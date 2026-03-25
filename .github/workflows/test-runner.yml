@@ -1,0 +1,22 @@
+name: Runner Test
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  ping:
+    runs-on: [self-hosted, macOS, arm64, unity]
+    steps:
+      - name: Runner calisiyor mu?
+        run: echo "✅ Runner aktif! Host: $HOSTNAME"
+
+      - name: Sistem bilgisi
+        run: |
+          echo "macOS: $(sw_vers -productVersion)"
+          echo "Chip: $(uname -m)"
+          echo "Unity:"
+          ls /Applications/ | grep -i unity
+
+      - name: Git checkout
+        uses: actions/checkout@v4
