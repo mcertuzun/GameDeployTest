@@ -1,0 +1,83 @@
+name: Unity Build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  UNITY_PATH: /Applications/Unity/Hub/Editor/6000.3.11f1/Unity.app/Contents/MacOS/Unity
+  PROJECT_PATH: .
+
+jobs:
+  build-ios:
+    name: Build iOS
+    runs-on: [self-hosted, macOS, arm64, unity]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-iOS-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-iOS-
+
+      - name: Build iOS
+        run: |
+          $UNITY_PATH \
+            -quit \
+            -batchmode \
+            -nographics \
+            -projectPath $PROJECT_PATH \
+            -executeMethod BuildScript.BuildIOS \
+            -logFile build-ios.log \
+            -buildTarget iOS
+          echo "iOS build done"
+
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iOS-Build
+          path: |
+            Builds/iOS
+            build-ios.log
+          retention-days: 3
+
+  build-android:
+    name: Build Android
+    runs-on: [self-hosted, macOS, arm64, unity]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Unity Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-Android-
+
+      - name: Build Android
+        run: |
+          $UNITY_PATH \
+            -quit \
+            -batchmode \
+            -nographics \
+            -projectPath $PROJECT_PATH \
+            -executeMethod BuildScript.BuildAndroid \
+            -logFile build-android.log \
+            -buildTarget Android
+          echo "Android build done"
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Android-Build
+          path: |
+            Builds/Android
+            build-android.log
+          retention-days: 3
