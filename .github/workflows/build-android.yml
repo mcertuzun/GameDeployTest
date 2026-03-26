@@ -1,0 +1,45 @@
+name: Build Android
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  UNITY_PATH: /Applications/Unity/Hub/Editor/6000.3.11f1/Unity.app/Contents/MacOS/Unity
+
+jobs:
+  build-android:
+    name: Build Android
+    runs-on: [self-hosted, macOS, arm64, unity]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-Android-
+
+      - name: Build Android
+        run: |
+          $UNITY_PATH \
+            -quit \
+            -batchmode \
+            -nographics \
+            -projectPath . \
+            -executeMethod BuildScript.BuildAndroid \
+            -logFile build-android.log \
+            -buildTarget Android
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Android-Build
+          path: |
+            Builds/Android
+            build-android.log
+          retention-days: 3
