@@ -1,0 +1,143 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Platform"
+        required: true
+        type: choice
+        options:
+          - ios
+          - android
+          - both
+      runner:
+        description: "Runner"
+        required: true
+        type: choice
+        options:
+          - mac
+          - codemagic
+
+env:
+  UNITY_PATH: /Applications/Unity/Hub/Editor/6000.3.11f1/Unity.app/Contents/MacOS/Unity
+
+jobs:
+  build-ios-mac:
+    name: iOS — Mac
+    if: |
+      github.event.inputs.runner == 'mac' &&
+      (github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both')
+    runs-on: [self-hosted, macOS, arm64, unity]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-iOS-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-iOS-
+
+      - name: Build iOS
+        run: |
+          $UNITY_PATH \
+            -quit -batchmode -nographics \
+            -projectPath . \
+            -executeMethod BuildScript.BuildIOS \
+            -logFile build-ios.log \
+            -buildTarget iOS
+
+      - name: TestFlight yukle
+        run: bundle exec fastlane beta
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_CONTENT: ${{ secrets.ASC_KEY_CONTENT }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: iOS-Mac-Build
+          path: |
+            Builds/iOS
+            build-ios.log
+          retention-days: 3
+
+  build-android-mac:
+    name: Android — Mac
+    if: |
+      github.event.inputs.runner == 'mac' &&
+      (github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both')
+    runs-on: [self-hosted, macOS, arm64, unity]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-Android-${{ hashFiles('Assets/**', 'Packages/**', 'ProjectSettings/**') }}
+          restore-keys: Library-Android-
+
+      - name: Google Services JSON olustur
+        run: echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > Assets/Plugins/Android/google-services.json
+
+      - name: Build Android
+        run: |
+          $UNITY_PATH \
+            -quit -batchmode -nographics \
+            -projectPath . \
+            -executeMethod BuildScript.BuildAndroid \
+            -logFile build-android.log \
+            -buildTarget Android
+
+      - name: Firebase yukle
+        run: |
+          firebase appdistribution:distribute Builds/Android/game.apk \
+            --app ${{ secrets.FIREBASE_APP_ID }} \
+            --token ${{ secrets.FIREBASE_TOKEN }} \
+            --groups "testers" \
+            --release-notes "Mac build - ${{ github.sha }}"
+
+      - name: Google Services JSON temizle
+        if: always()
+        run: rm -f Assets/Plugins/Android/google-services.json
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Android-Mac-Build
+          path: |
+            Builds/Android
+            build-android.log
+          retention-days: 3
+
+  build-codemagic:
+    name: Codemagic trigger
+    if: github.event.inputs.runner == 'codemagic'
+    runs-on: [self-hosted, macOS, arm64, unity]
+    steps:
+      - name: Codemagic build tetikle
+        run: |
+          PLATFORM="${{ github.event.inputs.platform }}"
+          echo "Codemagic'te $PLATFORM build'i tetikleniyor..."
+          curl -s -X POST \
+            -H "x-auth-token: ${{ secrets.CODEMAGIC_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data "{
+              \"appId\": \"${{ secrets.CODEMAGIC_APP_ID }}\",
+              \"workflowId\": \"unity-ios-android\",
+              \"branch\": \"main\",
+              \"environment\": {
+                \"variables\": {
+                  \"BUILD_PLATFORM\": \"$PLATFORM\"
+                }
+              }
+            }" \
+            https://api.codemagic.io/builds
