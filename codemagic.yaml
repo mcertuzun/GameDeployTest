@@ -3,10 +3,10 @@ workflows:
     name: Unity iOS & Android (Test Build)
     max_build_duration: 60
     environment:
+      unity: 6000.3.11f1
       xcode: latest
       vars:
         BUNDLE_ID: com.mcertuzun.game01
-        UNITY_VERSION: 6000.3.11f1
       groups:
         - unity_credentials
         - firebase_credentials
@@ -14,12 +14,14 @@ workflows:
     scripts:
       - name: Unity lisans aktive et
         script: |
+          echo "Unity path: $UNITY_HOME"
           $UNITY_HOME/Unity \
             -quit -batchmode -nographics \
             -serial $UNITY_SERIAL \
             -username $UNITY_USERNAME \
             -password $UNITY_PASSWORD \
             -logFile /tmp/unity-activation.log || true
+          cat /tmp/unity-activation.log || true
 
       - name: Unity iOS build
         script: |
