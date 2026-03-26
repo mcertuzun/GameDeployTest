@@ -14,15 +14,15 @@ workflows:
     scripts:
       - name: Unity lisans aktive et
         script: |
-          echo "Unity path: $UNITY_HOME"
+          echo "=== UNITY_HOME: $UNITY_HOME ==="
+          echo "=== UNITY_BIN: $UNITY_BIN ==="
           $UNITY_HOME/Contents/MacOS/Unity \
             -quit -batchmode -nographics \
-            -serial $UNITY_SERIAL \
-            -username $UNITY_EMAIL \
-            -password $UNITY_PASSWORD \
-            -logFile /tmp/unity-activation.log
-          echo "--- Activation log ---"
-          cat /tmp/unity-activation.log || true
+            -serial "$UNITY_SERIAL" \
+            -username "$UNITY_EMAIL" \
+            -password "$UNITY_PASSWORD" \
+            -logFile -
+          echo "=== Activation exit code: $? ==="
 
       - name: Unity iOS build
         script: |
@@ -30,7 +30,7 @@ workflows:
             -quit -batchmode -nographics \
             -projectPath . \
             -executeMethod BuildScript.BuildIOS \
-            -logFile build-ios.log \
+            -logFile - \
             -buildTarget iOS
 
       - name: Unity Android build
@@ -39,7 +39,7 @@ workflows:
             -quit -batchmode -nographics \
             -projectPath . \
             -executeMethod BuildScript.BuildAndroid \
-            -logFile build-android.log \
+            -logFile - \
             -buildTarget Android
 
       - name: Firebase App Distribution
@@ -56,10 +56,8 @@ workflows:
         script: |
           $UNITY_HOME/Contents/MacOS/Unity \
             -quit -batchmode -returnlicense \
-            -logFile /tmp/unity-return.log || true
+            -logFile - || true
 
     artifacts:
       - Builds/iOS/**
       - Builds/Android/**
-      - build-ios.log
-      - build-android.log
