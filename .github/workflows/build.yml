@@ -100,12 +100,13 @@ jobs:
 
       - name: Firebase yukle
         run: |
+          echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > /tmp/firebase-sa.json
+          GOOGLE_APPLICATION_CREDENTIALS=/tmp/firebase-sa.json \
           firebase appdistribution:distribute Builds/Android/game.apk \
             --app ${{ secrets.FIREBASE_APP_ID }} \
             --groups "testers" \
             --release-notes "Mac build ${{ github.sha }}"
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          rm -f /tmp/firebase-sa.json
 
       - name: Google Services JSON temizle
         if: always()
