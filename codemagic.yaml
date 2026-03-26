@@ -1,0 +1,53 @@
+workflows:
+  unity-ios-android:
+    name: Unity iOS & Android (Test Build)
+    max_build_duration: 60
+    environment:
+      vars:
+        UNITY_VERSION: 6000.3.11f1
+        BUNDLE_ID: com.mcertuzun.game01
+      groups:
+        - firebase_credentials
+        - appstore_credentials
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: develop
+          include: true
+    scripts:
+      - name: Unity iOS build
+        script: |
+          /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
+            -quit \
+            -batchmode \
+            -nographics \
+            -projectPath . \
+            -executeMethod BuildScript.BuildIOS \
+            -logFile build-ios.log \
+            -buildTarget iOS
+
+      - name: Unity Android build
+        script: |
+          /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
+            -quit \
+            -batchmode \
+            -nographics \
+            -projectPath . \
+            -executeMethod BuildScript.BuildAndroid \
+            -logFile build-android.log \
+            -buildTarget Android
+
+      - name: Firebase App Distribution
+        script: |
+          firebase appdistribution:distribute Builds/Android/game.apk \
+            --app $FIREBASE_APP_ID \
+            --token $FIREBASE_TOKEN \
+            --groups "testers" \
+            --release-notes "Codemagic build - $CM_COMMIT"
+
+    artifacts:
+      - Builds/iOS/**
+      - Builds/Android/**
+      - build-ios.log
+      - build-android.log
