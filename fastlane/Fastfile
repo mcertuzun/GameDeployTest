@@ -32,9 +32,15 @@ platform :ios do
       use_automatic_signing: false,
       path: "Builds/iOS/Unity-iPhone.xcodeproj",
       team_id: "Z89P7J7APY",
+      targets: ["Unity-iPhone"],
       bundle_identifier: "com.mcertuzun.game01",
       profile_name: "match AppStore com.mcertuzun.game01",
       code_sign_identity: "Apple Distribution"
+    )
+    update_code_signing_settings(
+      use_automatic_signing: true,
+      path: "Builds/iOS/Unity-iPhone.xcodeproj",
+      targets: ["UnityFramework"]
     )
     gym(
       project: "Builds/iOS/Unity-iPhone.xcodeproj",
