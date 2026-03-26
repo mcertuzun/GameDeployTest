@@ -1,0 +1,31 @@
+name: Linear Notification
+
+on:
+  workflow_run:
+    workflows: ["Build iOS", "Build Android"]
+    types: [completed]
+
+jobs:
+  notify:
+    runs-on: [self-hosted, macOS, arm64, unity]
+    steps:
+      - name: Linear build sonucu bildir
+        run: |
+          WORKFLOW="${{ github.event.workflow_run.name }}"
+          STATUS="${{ github.event.workflow_run.conclusion }}"
+          RUN_URL="${{ github.event.workflow_run.html_url }}"
+          SHA="${{ github.event.workflow_run.head_sha }}"
+          SHORT_SHA="${SHA:0:7}"
+
+          if [ "$STATUS" = "success" ]; then
+            EMOJI="✅"
+            MESSAGE="$EMOJI $WORKFLOW build basarili — commit \`$SHORT_SHA\`\n\n[Build detaylari]($RUN_URL)"
+          else
+            EMOJI="❌"
+            MESSAGE="$EMOJI $WORKFLOW build basarisiz — commit \`$SHORT_SHA\`\n\n[Hata detaylari]($RUN_URL)"
+          fi
+
+          curl -s -X POST https://api.linear.app/graphql \
+            -H "Authorization: ${{ secrets.LINEAR_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d "{\"query\": \"mutation { commentCreate(input: { issueId: \\\"MCE-6\\\", body: \\\"$MESSAGE\\\" }) { success } }\"}"
