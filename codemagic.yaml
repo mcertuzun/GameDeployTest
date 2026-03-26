@@ -4,9 +4,10 @@ workflows:
     max_build_duration: 60
     environment:
       vars:
-        UNITY_VERSION: 6000.3.11f1
         BUNDLE_ID: com.mcertuzun.game01
+        UNITY_VERSION: 6000.3.11f1
       groups:
+        - unity_credentials
         - firebase_credentials
         - appstore_credentials
     triggering:
@@ -16,6 +17,18 @@ workflows:
         - pattern: develop
           include: true
     scripts:
+      - name: Unity lisans aktive et
+        script: |
+          /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
+            -quit \
+            -batchmode \
+            -nographics \
+            -serial $UNITY_SERIAL \
+            -username $UNITY_USERNAME \
+            -password $UNITY_PASSWORD \
+            -logFile /tmp/unity-activation.log || true
+          cat /tmp/unity-activation.log || true
+
       - name: Unity iOS build
         script: |
           /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
@@ -40,11 +53,20 @@ workflows:
 
       - name: Firebase App Distribution
         script: |
+          npm install -g firebase-tools
           firebase appdistribution:distribute Builds/Android/game.apk \
             --app $FIREBASE_APP_ID \
             --token $FIREBASE_TOKEN \
             --groups "testers" \
-            --release-notes "Codemagic build - $CM_COMMIT"
+            --release-notes "Codemagic build $CM_COMMIT"
+
+      - name: Unity lisans iade et
+        script: |
+          /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
+            -quit \
+            -batchmode \
+            -returnlicense \
+            -logFile /tmp/unity-return.log || true
 
     artifacts:
       - Builds/iOS/**
