@@ -23,10 +23,20 @@ platform :ios do
       issuer_id: ENV["ASC_ISSUER_ID"],
       key_content: ENV["ASC_KEY_CONTENT"]
     )
+    create_keychain(
+      name: "fastlane_keychain",
+      password: "fastlane",
+      default_keychain: true,
+      unlock: true,
+      timeout: 3600,
+      lock_when_sleeps: false
+    )
     match(
       type: "appstore",
       app_identifier: "com.mcertuzun.game01",
-      readonly: true
+      readonly: true,
+      keychain_name: "fastlane_keychain",
+      keychain_password: "fastlane"
     )
     update_code_signing_settings(
       use_automatic_signing: false,
@@ -57,6 +67,8 @@ platform :ios do
       skip_waiting_for_build_processing: true,
       notify_external_testers: false
     )
+  ensure
+    delete_keychain(name: "fastlane_keychain") rescue nil
   end
 
 end
