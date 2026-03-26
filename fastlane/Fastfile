@@ -28,6 +28,13 @@ platform :ios do
       app_identifier: "com.mcertuzun.game01",
       readonly: true
     )
+    gym(
+      project: "Builds/iOS/Unity-iPhone.xcodeproj",
+      scheme: "Unity-iPhone",
+      export_method: "app-store",
+      output_directory: "Builds/iOS",
+      output_name: "GameDeployTest.ipa"
+    )
     pilot(
       ipa: "Builds/iOS/GameDeployTest.ipa",
       skip_waiting_for_build_processing: true,
