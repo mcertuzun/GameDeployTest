@@ -25,19 +25,21 @@ platform :ios do
     )
     create_keychain(
       name: "fastlane_keychain",
-      password: "fastlane",
+      password: "fastlane123",
       default_keychain: true,
       unlock: true,
       timeout: 3600,
-      lock_when_sleeps: false
+      lock_when_sleeps: false,
+      add_to_search_list: true
     )
     match(
       type: "appstore",
       app_identifier: "com.mcertuzun.game01",
       readonly: true,
       keychain_name: "fastlane_keychain",
-      keychain_password: "fastlane"
+      keychain_password: "fastlane123"
     )
+    sh("security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k fastlane123 ~/Library/Keychains/fastlane_keychain.keychain-db")
     update_code_signing_settings(
       use_automatic_signing: false,
       path: "Builds/iOS/Unity-iPhone.xcodeproj",
