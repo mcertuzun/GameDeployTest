@@ -14,12 +14,15 @@ workflows:
     scripts:
       - name: Unity lisans aktive et
         script: |
-          $UNITY_BIN \
+          echo "Unity path: $UNITY_HOME"
+          $UNITY_HOME/Contents/MacOS/Unity \
             -quit -batchmode -nographics \
             -serial $UNITY_SERIAL \
             -username $UNITY_EMAIL \
             -password $UNITY_PASSWORD \
-            -logFile /tmp/unity-activation.log || true
+            -logFile /tmp/unity-activation.log
+          echo "--- Activation log ---"
+          cat /tmp/unity-activation.log || true
 
       - name: Unity iOS build
         script: |
@@ -51,7 +54,7 @@ workflows:
 
       - name: Unity lisans iade et
         script: |
-          $UNITY_BIN \
+          $UNITY_HOME/Contents/MacOS/Unity \
             -quit -batchmode -returnlicense \
             -logFile /tmp/unity-return.log || true
 
