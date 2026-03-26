@@ -25,9 +25,10 @@ env:
 jobs:
   build-ios-mac:
     name: iOS — Mac
-    if: |
+    if: >
       github.event.inputs.runner == 'mac' &&
-      (github.event.inputs.platform == 'ios' || github.event.inputs.platform == 'both')
+      (github.event.inputs.platform == 'ios' ||
+       github.event.inputs.platform == 'both')
     runs-on: [self-hosted, macOS, arm64, unity]
     steps:
       - name: Checkout
@@ -69,9 +70,10 @@ jobs:
 
   build-android-mac:
     name: Android — Mac
-    if: |
+    if: >
       github.event.inputs.runner == 'mac' &&
-      (github.event.inputs.platform == 'android' || github.event.inputs.platform == 'both')
+      (github.event.inputs.platform == 'android' ||
+       github.event.inputs.platform == 'both')
     runs-on: [self-hosted, macOS, arm64, unity]
     steps:
       - name: Checkout
@@ -100,9 +102,10 @@ jobs:
         run: |
           firebase appdistribution:distribute Builds/Android/game.apk \
             --app ${{ secrets.FIREBASE_APP_ID }} \
-            --token ${{ secrets.FIREBASE_TOKEN }} \
             --groups "testers" \
-            --release-notes "Mac build - ${{ github.sha }}"
+            --release-notes "Mac build ${{ github.sha }}"
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
       - name: Google Services JSON temizle
         if: always()
@@ -125,19 +128,12 @@ jobs:
     steps:
       - name: Codemagic build tetikle
         run: |
-          PLATFORM="${{ github.event.inputs.platform }}"
-          echo "Codemagic'te $PLATFORM build'i tetikleniyor..."
           curl -s -X POST \
             -H "x-auth-token: ${{ secrets.CODEMAGIC_API_TOKEN }}" \
             -H "Content-Type: application/json" \
             --data "{
               \"appId\": \"${{ secrets.CODEMAGIC_APP_ID }}\",
               \"workflowId\": \"unity-ios-android\",
-              \"branch\": \"main\",
-              \"environment\": {
-                \"variables\": {
-                  \"BUILD_PLATFORM\": \"$PLATFORM\"
-                }
-              }
+              \"branch\": \"main\"
             }" \
             https://api.codemagic.io/builds
