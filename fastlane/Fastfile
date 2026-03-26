@@ -40,6 +40,7 @@ platform :ios do
     update_code_signing_settings(
       use_automatic_signing: true,
       path: "Builds/iOS/Unity-iPhone.xcodeproj",
+      team_id: "Z89P7J7APY",
       targets: ["UnityFramework"]
     )
     gym(
@@ -48,6 +49,7 @@ platform :ios do
       export_method: "app-store",
       output_directory: "Builds/iOS",
       output_name: "GameDeployTest.ipa",
+      xcargs: "CODE_SIGN_STYLE[sdk=iphoneos*]=Manual DEVELOPMENT_TEAM=Z89P7J7APY",
       export_options: {
         method: "app-store",
         teamID: "Z89P7J7APY",
