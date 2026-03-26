@@ -3,7 +3,6 @@ workflows:
     name: Unity iOS & Android (Test Build)
     max_build_duration: 60
     environment:
-      unity: *unity_credentials
       xcode: latest
       vars:
         BUNDLE_ID: com.mcertuzun.game01
@@ -13,6 +12,15 @@ workflows:
         - firebase_credentials
         - appstore_credentials
     scripts:
+      - name: Unity lisans aktive et
+        script: |
+          $UNITY_HOME/Unity \
+            -quit -batchmode -nographics \
+            -serial $UNITY_SERIAL \
+            -username $UNITY_USERNAME \
+            -password $UNITY_PASSWORD \
+            -logFile /tmp/unity-activation.log || true
+
       - name: Unity iOS build
         script: |
           $UNITY_HOME/Unity \
@@ -39,6 +47,12 @@ workflows:
             --token $FIREBASE_TOKEN \
             --groups "testers" \
             --release-notes "Codemagic build $CM_COMMIT"
+
+      - name: Unity lisans iade et
+        script: |
+          $UNITY_HOME/Unity \
+            -quit -batchmode -returnlicense \
+            -logFile /tmp/unity-return.log || true
 
     artifacts:
       - Builds/iOS/**
