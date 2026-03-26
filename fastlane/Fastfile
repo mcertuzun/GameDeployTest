@@ -28,12 +28,27 @@ platform :ios do
       app_identifier: "com.mcertuzun.game01",
       readonly: true
     )
+    update_code_signing_settings(
+      use_automatic_signing: false,
+      path: "Builds/iOS/Unity-iPhone.xcodeproj",
+      team_id: "Z89P7J7APY",
+      bundle_identifier: "com.mcertuzun.game01",
+      profile_name: "match AppStore com.mcertuzun.game01",
+      code_sign_identity: "Apple Distribution"
+    )
     gym(
       project: "Builds/iOS/Unity-iPhone.xcodeproj",
       scheme: "Unity-iPhone",
       export_method: "app-store",
       output_directory: "Builds/iOS",
-      output_name: "GameDeployTest.ipa"
+      output_name: "GameDeployTest.ipa",
+      export_options: {
+        method: "app-store",
+        teamID: "Z89P7J7APY",
+        provisioningProfiles: {
+          "com.mcertuzun.game01" => "match AppStore com.mcertuzun.game01"
+        }
+      }
     )
     pilot(
       ipa: "Builds/iOS/GameDeployTest.ipa",
