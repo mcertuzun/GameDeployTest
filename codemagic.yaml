@@ -10,31 +10,20 @@ workflows:
         - unity_credentials
         - firebase_credentials
         - appstore_credentials
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: develop
-          include: true
     scripts:
       - name: Unity lisans aktive et
         script: |
           /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
-            -quit \
-            -batchmode \
-            -nographics \
+            -quit -batchmode -nographics \
             -serial $UNITY_SERIAL \
             -username $UNITY_USERNAME \
             -password $UNITY_PASSWORD \
             -logFile /tmp/unity-activation.log || true
-          cat /tmp/unity-activation.log || true
 
       - name: Unity iOS build
         script: |
           /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
-            -quit \
-            -batchmode \
-            -nographics \
+            -quit -batchmode -nographics \
             -projectPath . \
             -executeMethod BuildScript.BuildIOS \
             -logFile build-ios.log \
@@ -43,9 +32,7 @@ workflows:
       - name: Unity Android build
         script: |
           /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
-            -quit \
-            -batchmode \
-            -nographics \
+            -quit -batchmode -nographics \
             -projectPath . \
             -executeMethod BuildScript.BuildAndroid \
             -logFile build-android.log \
@@ -63,9 +50,7 @@ workflows:
       - name: Unity lisans iade et
         script: |
           /Applications/Unity/Hub/Editor/$UNITY_VERSION/Unity.app/Contents/MacOS/Unity \
-            -quit \
-            -batchmode \
-            -returnlicense \
+            -quit -batchmode -returnlicense \
             -logFile /tmp/unity-return.log || true
 
     artifacts:
