@@ -15,7 +15,7 @@ workflows:
       - name: Unity lisans aktive et
         script: |
           echo "Unity path: $UNITY_HOME"
-          $UNITY_HOME/Unity \
+          $UNITY_HOME/Contents/MacOS/Unity \
             -quit -batchmode -nographics \
             -serial $UNITY_SERIAL \
             -username $UNITY_USERNAME \
@@ -25,7 +25,7 @@ workflows:
 
       - name: Unity iOS build
         script: |
-          $UNITY_HOME/Unity \
+          $UNITY_HOME/Contents/MacOS/Unity \
             -quit -batchmode -nographics \
             -projectPath . \
             -executeMethod BuildScript.BuildIOS \
@@ -34,7 +34,7 @@ workflows:
 
       - name: Unity Android build
         script: |
-          $UNITY_HOME/Unity \
+          $UNITY_HOME/Contents/MacOS/Unity \
             -quit -batchmode -nographics \
             -projectPath . \
             -executeMethod BuildScript.BuildAndroid \
@@ -52,7 +52,7 @@ workflows:
 
       - name: Unity lisans iade et
         script: |
-          $UNITY_HOME/Unity \
+          $UNITY_HOME/Contents/MacOS/Unity \
             -quit -batchmode -returnlicense \
             -logFile /tmp/unity-return.log || true
 
