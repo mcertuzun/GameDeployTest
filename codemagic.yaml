@@ -12,35 +12,41 @@ workflows:
         - firebase_credentials
         - appstore_credentials
     scripts:
-      - name: Unity lisans aktive et
+      - name: Build iOS
         script: |
-          echo "=== UNITY_HOME: $UNITY_HOME ==="
-          echo "=== UNITY_BIN: $UNITY_BIN ==="
           $UNITY_HOME/Contents/MacOS/Unity \
             -quit -batchmode -nographics \
             -serial "$UNITY_SERIAL" \
             -username "$UNITY_EMAIL" \
             -password "$UNITY_PASSWORD" \
-            -logFile -
-          echo "=== Activation exit code: $? ==="
-
-      - name: Unity iOS build
-        script: |
+            -logFile /tmp/activation.log || true
           $UNITY_HOME/Contents/MacOS/Unity \
             -quit -batchmode -nographics \
             -projectPath . \
             -executeMethod BuildScript.BuildIOS \
             -logFile - \
             -buildTarget iOS
+          $UNITY_HOME/Contents/MacOS/Unity \
+            -quit -batchmode -returnlicense \
+            -logFile /tmp/return.log || true
 
-      - name: Unity Android build
+      - name: Build Android
         script: |
+          $UNITY_HOME/Contents/MacOS/Unity \
+            -quit -batchmode -nographics \
+            -serial "$UNITY_SERIAL" \
+            -username "$UNITY_EMAIL" \
+            -password "$UNITY_PASSWORD" \
+            -logFile /tmp/activation.log || true
           $UNITY_HOME/Contents/MacOS/Unity \
             -quit -batchmode -nographics \
             -projectPath . \
             -executeMethod BuildScript.BuildAndroid \
             -logFile - \
             -buildTarget Android
+          $UNITY_HOME/Contents/MacOS/Unity \
+            -quit -batchmode -returnlicense \
+            -logFile /tmp/return.log || true
 
       - name: Firebase App Distribution
         script: |
@@ -51,12 +57,6 @@ workflows:
             --groups "testers" \
             --release-notes "Codemagic build $CM_COMMIT"
           rm -f /tmp/firebase-sa.json
-
-      - name: Unity lisans iade et
-        script: |
-          $UNITY_HOME/Contents/MacOS/Unity \
-            -quit -batchmode -returnlicense \
-            -logFile - || true
 
     artifacts:
       - Builds/iOS/**
