@@ -87,7 +87,9 @@ jobs:
           restore-keys: Library-Android-
 
       - name: Google Services JSON olustur
-        run: echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > Assets/Plugins/Android/google-services.json
+        run: |
+          mkdir -p Assets/Plugins/Android
+          echo '${{ secrets.GOOGLE_SERVICES_JSON }}' > Assets/Plugins/Android/google-services.json
 
       - name: Build Android
         run: |
